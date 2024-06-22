@@ -1,0 +1,12 @@
+[package]
+name = "s3"
+version = "0.1.0"
+authors = ["Bob Belderbos <bob@pybit.es>"]
+edition = "2021"
+description = "A script to upload files to S3"
+
+[dependencies]
+clap = { version = "4.5.7", features = ["derive", "env"] }
+rusoto_core = "0.48.0"
+rusoto_s3 = "0.48.0"
+tokio = { version = "1.38.0", features = ["full"] }
