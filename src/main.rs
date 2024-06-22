@@ -1,10 +1,10 @@
-use rusoto_core::{Region, credential::EnvironmentProvider, HttpClient};
-use rusoto_s3::{S3Client, S3, PutObjectRequest};
+use clap::Parser;
+use rusoto_core::{credential::EnvironmentProvider, HttpClient, Region};
+use rusoto_s3::{PutObjectRequest, S3Client, S3};
+use std::error::Error;
+use std::path::Path;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
-use std::error::Error;
-use clap::Parser;
-use std::path::Path;
 
 #[derive(Parser, Debug)]
 #[clap(about, version, author)]
@@ -17,7 +17,12 @@ struct Args {
     file: String,
 }
 
-async fn upload_image_to_s3(bucket: &str, key: &str, file: &str, region: Region) -> Result<(), Box<dyn Error>> {
+async fn upload_image_to_s3(
+    bucket: &str,
+    key: &str,
+    file: &str,
+    region: Region,
+) -> Result<(), Box<dyn Error>> {
     let s3_client = S3Client::new_with(HttpClient::new()?, EnvironmentProvider::default(), region);
 
     let mut file = File::open(file).await?;
