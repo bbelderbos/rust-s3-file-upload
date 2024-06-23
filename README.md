@@ -1,7 +1,32 @@
-# AWS s3 upload script
+# s3_file_manager
 
-Curious
-A while ago I made a Python script to upload files to an S3 bucket. It's a simple script that uses the `boto3` library to interact with the AWS API. Check it out [here](https://github.com/PyBites-Open-Source/pybites-tools/blob/main/pybites_tools/aws.py).
+`s3_file_manager` is a Rust crate for uploading files to AWS S3 and listing objects with pagination support.
 
-In this repo I made a similar script in Rust using the rusoto crate to do the same thing.
+## Usage
 
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+s3_file_manager = "0.1.0"
+```
+
+## Or use as a command line tool
+
+```bash
+$ cargo install s3_file_manager
+$ s3 --help
+A Rust crate for uploading files to AWS S3 and listing objects with pagination support.
+
+Usage: s3 [OPTIONS] --bucket <BUCKET> --region <REGION> <--file-pattern <FILE_PATTERN>|--list-images>
+
+Options:
+  -b, --bucket <BUCKET>                          [env: S3_BUCKET_NAME=bobby-artwork]
+  -r, --region <REGION>                          [env: AWS_REGION=us-east-2]
+  -f, --file-pattern <FILE_PATTERN>
+  -l, --list-images
+  -m, --max-items <MAX_ITEMS>                    [default: 100]
+  -c, --continuation-token <CONTINUATION_TOKEN>
+  -h, --help                                     Print help
+  -V, --version                                  Print version
+```

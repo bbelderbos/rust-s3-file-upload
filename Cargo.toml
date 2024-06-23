@@ -1,9 +1,11 @@
 [package]
-name = "s3"
+name = "s3_file_manager"
 version = "0.1.0"
 authors = ["Bob Belderbos <bob@pybit.es>"]
 edition = "2021"
-description = "A script to upload files to S3"
+description = "A Rust crate for uploading files to AWS S3 and listing objects with pagination support."
+license = "MIT"
+repository = "https://github.com/bbelderbos/s3_file_manager"
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive", "env"] }
@@ -12,3 +14,7 @@ rusoto_core = "0.48.0"
 rusoto_s3 = "0.48.0"
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1.38.0", features = ["full"] }
+
+[[bin]]
+name = "s3"
+path = "src/main.rs"
