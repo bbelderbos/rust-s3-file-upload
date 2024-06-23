@@ -30,3 +30,5 @@ Options:
   -h, --help                                     Print help
   -V, --version                                  Print version
 ```
+
+This assumes that you have the AWS credentials (`AWS_ACCESS_KEY_ID` and `AWS_ACCESS_SECRET_KEY`) set up in your environment. If not, you can set them up using the `aws configure` command.
