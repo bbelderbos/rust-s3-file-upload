@@ -26,14 +26,11 @@ struct Args {
     max_items: i64,
 }
 
-fn create_s3_client(region: &str) -> S3Client {
+fn create_s3_client(region: Region) -> S3Client {
     S3Client::new_with(
         HttpClient::new().expect("Failed to create HTTP client"),
         EnvironmentProvider::default(),
-        Region::Custom {
-            name: region.to_owned(),
-            endpoint: format!("https://{}.s3.amazonaws.com", region),
-        },
+        region,
     )
 }
 
@@ -51,7 +48,7 @@ async fn upload_image_to_s3(
         bucket: bucket.to_string(),
         key: key.to_string(),
         body: Some(buffer.into()),
-        acl: Some("public-read".to_string()), // Set ACL to public-read
+        acl: Some("public-read".to_string()), // Set ACL to public-read (requires public bucket)
         ..Default::default()
     };
 
@@ -82,7 +79,6 @@ async fn list_images_in_s3(
         if let Some(contents) = result.contents {
             for object in contents {
                 if let Some(key) = object.key {
-                    // Construct the full URL for public objects
                     let url = format!("https://{}.s3.{}.amazonaws.com/{}", bucket, region, key);
                     println!("Found object with URL: {}", url);
                 }
@@ -103,7 +99,8 @@ async fn list_images_in_s3(
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
 
-    let s3_client = create_s3_client(&args.region);
+    let region = args.region.parse::<Region>()?;
+    let s3_client = create_s3_client(region);
 
     if args.list_images {
         list_images_in_s3(&args.bucket, &args.region, &s3_client, args.max_items).await?;
