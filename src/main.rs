@@ -2,6 +2,7 @@ use clap::{ArgGroup, Parser};
 use glob::glob;
 use rusoto_core::{credential::EnvironmentProvider, HttpClient, Region};
 use rusoto_s3::{ListObjectsV2Request, PutObjectRequest, S3Client, S3};
+use serde::Serialize;
 use std::error::Error;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
@@ -24,6 +25,14 @@ struct Args {
     list_images: bool,
     #[clap(short, long, default_value = "100")]
     max_items: i64,
+    #[clap(short, long)]
+    continuation_token: Option<String>,
+}
+
+#[derive(Serialize)]
+struct ListResponse {
+    objects: Vec<String>,
+    continuation_token: Option<String>,
 }
 
 fn create_s3_client(region: Region) -> S3Client {
@@ -60,39 +69,31 @@ async fn upload_image_to_s3(
 
 async fn list_images_in_s3(
     bucket: &str,
-    region: &str,
     s3_client: &S3Client,
     max_items: i64,
-) -> Result<(), Box<dyn Error>> {
-    let mut continuation_token = None;
+    continuation_token: Option<String>,
+) -> Result<ListResponse, Box<dyn Error>> {
+    let list_request = ListObjectsV2Request {
+        bucket: bucket.to_string(),
+        max_keys: Some(max_items),
+        continuation_token,
+        ..Default::default()
+    };
 
-    loop {
-        let list_request = ListObjectsV2Request {
-            bucket: bucket.to_string(),
-            max_keys: Some(max_items),
-            continuation_token: continuation_token.clone(),
-            ..Default::default()
-        };
+    let result = s3_client.list_objects_v2(list_request).await?;
+    let objects = result
+        .contents
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|obj| obj.key)
+        .collect::<Vec<String>>();
 
-        let result = s3_client.list_objects_v2(list_request).await?;
+    let response = ListResponse {
+        objects,
+        continuation_token: result.next_continuation_token,
+    };
 
-        if let Some(contents) = result.contents {
-            for object in contents {
-                if let Some(key) = object.key {
-                    let url = format!("https://{}.s3.{}.amazonaws.com/{}", bucket, region, key);
-                    println!("Found object with URL: {}", url);
-                }
-            }
-        }
-
-        if !result.is_truncated.unwrap_or(false) {
-            break;
-        }
-
-        continuation_token = result.next_continuation_token;
-    }
-
-    Ok(())
+    Ok(response)
 }
 
 #[tokio::main]
@@ -103,7 +104,25 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let s3_client = create_s3_client(region);
 
     if args.list_images {
-        list_images_in_s3(&args.bucket, &args.region, &s3_client, args.max_items).await?;
+        let response = list_images_in_s3(
+            &args.bucket,
+            &s3_client,
+            args.max_items,
+            args.continuation_token.clone(),
+        )
+        .await?;
+
+        for object in response.objects {
+            let url = format!(
+                "https://{}.s3.{}.amazonaws.com/{}",
+                args.bucket, args.region, object
+            );
+            println!("Found object with URL: {}", url);
+        }
+
+        if let Some(token) = response.continuation_token {
+            println!("Next Continuation Token: {}", token);
+        }
     } else if let Some(pattern) = args.file_pattern {
         for entry in glob(&pattern)? {
             match entry {

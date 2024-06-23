@@ -1025,6 +1025,7 @@ dependencies = [
  "glob",
  "rusoto_core",
  "rusoto_s3",
+ "serde",
  "tokio",
 ]
 
