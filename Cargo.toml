@@ -1,6 +1,6 @@
 [package]
 name = "s3_file_manager"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Bob Belderbos <bob@pybit.es>"]
 edition = "2021"
 description = "A Rust crate for uploading files to AWS S3 and listing objects with pagination support."
