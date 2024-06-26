@@ -8,20 +8,20 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-s3_file_manager = "0.1.0"
+s3_file_manager = "0.2.0"
 ```
 
 ## Or use as a command line tool
 
 ```bash
 $ cargo install s3_file_manager
-$ s3 --help
+$ s3fm --help
 A Rust crate for uploading files to AWS S3 and listing objects with pagination support.
 
-Usage: s3 [OPTIONS] --bucket <BUCKET> --region <REGION> <--file-pattern <FILE_PATTERN>|--list-images>
+Usage: s3fm [OPTIONS] --bucket <BUCKET> --region <REGION> <--file-pattern <FILE_PATTERN>|--list-images>
 
 Options:
-  -b, --bucket <BUCKET>                          [env: S3_BUCKET_NAME=bobby-artwork]
+  -b, --bucket <BUCKET>                          [env: S3_BUCKET_NAME=my-bucket]
   -r, --region <REGION>                          [env: AWS_REGION=us-east-2]
   -f, --file-pattern <FILE_PATTERN>
   -l, --list-images
